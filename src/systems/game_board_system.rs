@@ -1,12 +1,14 @@
+use std::hash::Hash;
+use bevy::prelude::*;
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq,Hash, Reflect)]
 pub enum Tile {
     Empty,
     Black,
     White
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq,Hash, Reflect)]
 pub struct TileData {
     pub tile_state: Tile,
     pub is_alive: bool
@@ -33,16 +35,20 @@ impl TileSpriteData {
     }
 }
 
+#[derive(Hash, Reflect)]
+#[reflect(Hash)]
 pub struct GameState {
-    pub game_board: [TileData; 81],
-    pub current_player: Tile
+    pub game_board: Vec<TileData>,
+    pub current_player: Tile,
+    pub current_player_id: usize
 }
 
 impl Default for GameState {
     fn default() -> GameState {
         GameState {
-            game_board: [TileData::default(); 81],
-            current_player: Tile::White
+            game_board:  [TileData::default();81].to_vec(),
+            current_player: Tile::White,
+            current_player_id: 0
         }
     }
 }
@@ -66,7 +72,7 @@ impl GameState {
     }
 }
 
-fn grant_life_to_stone(index: usize,  board: &mut [TileData; 81]) {
+fn grant_life_to_stone(index: usize,  board: &mut Vec<TileData>) {
     if board[index].is_alive || board[index].tile_state == Tile::Empty {
         return;
     }
@@ -81,7 +87,7 @@ fn grant_life_to_stone(index: usize,  board: &mut [TileData; 81]) {
     }
 }
 
-pub fn apply_life_and_death_rules_to_board(board: &mut [TileData; 81]) -> Vec<usize> {
+pub fn apply_life_and_death_rules_to_board(board: &mut Vec<TileData>) -> Vec<usize> {
     for i in 0..board.len() {
         board[i].is_alive = false;
     }
